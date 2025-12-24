@@ -1111,6 +1111,228 @@ CONF_SCHEMA = {
             },
             "required": ["producers"],
         },
+        "adaptive_strategy": {
+            "description": "Adaptive strategy configuration for per-asset profiling and contextual risk filtering.",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable adaptive strategy features globally.",
+                    "type": "boolean",
+                    "default": False,
+                },
+                "asset_profiles": {
+                    "description": "Per-asset statistical profiling configuration.",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable per-asset profiling.",
+                            "type": "boolean",
+                            "default": False,
+                        },
+                        "storage_path": {
+                            "description": "Path to store asset profiles.",
+                            "type": "string",
+                            "default": "user_data/profiles",
+                        },
+                        "update_interval_hours": {
+                            "description": "Hours between profile updates.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 24,
+                        },
+                        "rolling_window_days": {
+                            "description": "Days of historical data for profile calculation.",
+                            "type": "integer",
+                            "minimum": 7,
+                            "default": 30,
+                        },
+                        "min_trades_for_profile": {
+                            "description": "Minimum trades required before profile is used.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 10,
+                        },
+                        "auto_update": {
+                            "description": "Automatically update profiles during trading.",
+                            "type": "boolean",
+                            "default": True,
+                        },
+                    },
+                },
+                "contextual_risk": {
+                    "description": "Contextual risk filtering using external signals.",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable contextual risk filtering.",
+                            "type": "boolean",
+                            "default": False,
+                        },
+                        "providers": {
+                            "description": "List of signal providers to use.",
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "default": [],
+                        },
+                        "signals_dir": {
+                            "description": "Directory for signal data files.",
+                            "type": "string",
+                            "default": "user_data/signals",
+                        },
+                        "extreme_fear_threshold": {
+                            "description": "Fear/Greed index below which entries are blocked.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "default": 20,
+                        },
+                        "high_fear_threshold": {
+                            "description": "Fear/Greed index below which stake is reduced.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "default": 35,
+                        },
+                        "high_greed_threshold": {
+                            "description": "Fear/Greed index above which stake is reduced.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "default": 75,
+                        },
+                        "extreme_greed_threshold": {
+                            "description": "Fear/Greed index above which exposure is limited.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "default": 85,
+                        },
+                        "min_stake_multiplier": {
+                            "description": "Minimum stake multiplier under extreme conditions.",
+                            "type": "number",
+                            "minimum": 0.1,
+                            "maximum": 1.0,
+                            "default": 0.25,
+                        },
+                        "max_stoploss_multiplier": {
+                            "description": "Maximum stoploss width multiplier.",
+                            "type": "number",
+                            "minimum": 1.0,
+                            "maximum": 3.0,
+                            "default": 1.5,
+                        },
+                        "fallback_on_error": {
+                            "description": "Continue trading if signal providers fail.",
+                            "type": "boolean",
+                            "default": True,
+                        },
+                    },
+                },
+                "market_regime": {
+                    "description": "Market regime detection configuration.",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable market regime detection.",
+                            "type": "boolean",
+                            "default": False,
+                        },
+                        "lookback_period": {
+                            "description": "Candles to look back for regime detection.",
+                            "type": "integer",
+                            "minimum": 20,
+                            "default": 50,
+                        },
+                        "atr_period": {
+                            "description": "ATR calculation period.",
+                            "type": "integer",
+                            "minimum": 5,
+                            "default": 14,
+                        },
+                        "adx_period": {
+                            "description": "ADX calculation period.",
+                            "type": "integer",
+                            "minimum": 5,
+                            "default": 14,
+                        },
+                        "bb_period": {
+                            "description": "Bollinger Bands period.",
+                            "type": "integer",
+                            "minimum": 5,
+                            "default": 20,
+                        },
+                        "bb_std": {
+                            "description": "Bollinger Bands standard deviation multiplier.",
+                            "type": "number",
+                            "minimum": 1.0,
+                            "maximum": 4.0,
+                            "default": 2.0,
+                        },
+                        "adx_trend_threshold": {
+                            "description": "ADX value above which market is considered trending.",
+                            "type": "number",
+                            "minimum": 10,
+                            "maximum": 50,
+                            "default": 25.0,
+                        },
+                        "adx_strong_trend": {
+                            "description": "ADX value indicating strong trend.",
+                            "type": "number",
+                            "minimum": 20,
+                            "maximum": 70,
+                            "default": 40.0,
+                        },
+                        "volatility_percentile_high": {
+                            "description": "Percentile above which volatility is considered high.",
+                            "type": "number",
+                            "minimum": 50,
+                            "maximum": 99,
+                            "default": 80,
+                        },
+                        "volatility_percentile_low": {
+                            "description": "Percentile below which volatility is considered low.",
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 20,
+                        },
+                    },
+                },
+                "explainability": {
+                    "description": "Trade explainability configuration.",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable trade explainability logging.",
+                            "type": "boolean",
+                            "default": False,
+                        },
+                        "log_explanations": {
+                            "description": "Log trade explanations to console.",
+                            "type": "boolean",
+                            "default": True,
+                        },
+                        "store_explanations": {
+                            "description": "Store explanations in memory for API access.",
+                            "type": "boolean",
+                            "default": True,
+                        },
+                        "include_in_api": {
+                            "description": "Include explanations in API responses.",
+                            "type": "boolean",
+                            "default": True,
+                        },
+                        "max_entries_per_trade": {
+                            "description": "Maximum explanation entries per trade.",
+                            "type": "integer",
+                            "minimum": 5,
+                            "maximum": 100,
+                            "default": 20,
+                        },
+                    },
+                },
+            },
+        },
         "freqai": {
             "type": "object",
             "properties": {

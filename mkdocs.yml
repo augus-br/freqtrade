@@ -49,6 +49,7 @@ nav:
         - Recursive analysis: recursive-analysis.md
         - Advanced Strategy: strategy-advanced.md
         - Advanced Hyperopt: advanced-hyperopt.md
+        - Adaptive Strategy: adaptive-strategy.md
         - Orderflow: advanced-orderflow.md
         - Producer/Consumer mode: producer-consumer.md
         - SQL Cheat-sheet: sql_cheatsheet.md
