@@ -1,9 +1,8 @@
 name: Update Docker Hub Description
 on:
-  push:
-    branches:
-    - stable
-
+  workflow_dispatch:
+  schedule:
+    - cron: 9 8 * * 5
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -14,15 +13,17 @@ permissions: {}
 jobs:
   dockerHubDescription:
     name: "Update Docker Hub Description"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.ACTIONS_RUNNER_POLICY || 
+      '{"linux":["ubuntu-24.04"],"arm64":["ubuntu-24.04-arm"],"x64":["ubuntu-24.04"],"hosted":true}').linux }}
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
-    - name: Docker Hub Description
-      uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: freqtradeorg/freqtrade
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: freqtradeorg/freqtrade
+    timeout-minutes: 60

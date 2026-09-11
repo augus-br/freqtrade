@@ -3,16 +3,7 @@ name: Devcontainer Pre-Build
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * 0"
-  # push:
-  #   branches:
-  #     - "master"
-  #   tags:
-  #     - "v*.*.*"
-  #   pull_requests:
-  #     branches:
-  #       - "master"
-
+    - cron: 35 3 * * 5
 concurrency:
   group: "${{ github.workflow }}"
   cancel-in-progress: true
@@ -25,31 +16,34 @@ jobs:
     name: "Build and Push Devcontainer Image"
     permissions:
       packages: write  # Needed to push package versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.ACTIONS_RUNNER_POLICY || 
+      '{"linux":["ubuntu-24.04"],"arm64":["ubuntu-24.04-arm"],"x64":["ubuntu-24.04"],"hosted":true}').linux }}
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Pre-build dev container image
-      uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.19
-      with:
-        subFolder: .github
-        imageName: ghcr.io/${{ github.repository }}-devcontainer
-        cacheFrom: ghcr.io/${{ github.repository }}-devcontainer
-        push: always
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pre-build dev container image
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.19
+        with:
+          subFolder: .github
+          imageName: ghcr.io/${{ github.repository }}-devcontainer
+          cacheFrom: ghcr.io/${{ github.repository }}-devcontainer
+          push: always
 
 
+    timeout-minutes: 60
   packages-cleanup:
     name: "Docker Package Cleanup"
     uses: ./.github/workflows/packages-cleanup.yml
     # Only run on push, schedule, or release events
-    if: (github.event_name == 'push' || github.event_name == 'schedule') && github.repository == 'freqtrade/freqtrade'
+    if: (github.event_name == 'push' || github.event_name == 'schedule') && github.repository == 
+      'freqtrade/freqtrade'
     permissions:
       packages: write # Needed to delete package versions
     with:

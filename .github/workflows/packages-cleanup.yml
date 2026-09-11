@@ -3,7 +3,7 @@ name: Cleanup Packages
 on:
   workflow_call:
     inputs:
-       package_name:
+      package_name:
         description: 'Package name to clean up'
         required: false
         default: 'freqtrade'
@@ -25,6 +25,8 @@ on:
         default: true
         type: boolean
 
+  schedule:
+    - cron: 26 10 * * 5
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
@@ -37,16 +39,18 @@ permissions: {}
 jobs:
   deploy-docker:
     name: "Delete Packages"
-    runs-on: ubuntu-24.04
+    runs-on: ${{ fromJSON(vars.ACTIONS_RUNNER_POLICY || 
+      '{"linux":["ubuntu-24.04"],"arm64":["ubuntu-24.04-arm"],"x64":["ubuntu-24.04"],"hosted":true}').linux }}
     if: github.repository == 'freqtrade/freqtrade'
     permissions:
       packages: write  # Needed to delete package versions
 
     steps:
-    - name: "Delete untagged Package Versions"
-      uses: actions/delete-package-versions@e5bc658cc4c965c472efe991f8beea3981499c55 # v5.0.0
-      with:
-        package-name: ${{ inputs.package_name || env.PACKAGE_NAME }}
-        package-type: 'container'
-        min-versions-to-keep: 10
-        delete-only-untagged-versions: ${{ inputs.delete-untagged || 'true' }}
+      - name: "Delete untagged Package Versions"
+        uses: actions/delete-package-versions@e5bc658cc4c965c472efe991f8beea3981499c55 # v5.0.0
+        with:
+          package-name: ${{ (inputs.package_name || 'freqtrade') || env.PACKAGE_NAME }}
+          package-type: 'container'
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: ${{ inputs.delete-untagged || 'true' }}
+    timeout-minutes: 60

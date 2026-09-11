@@ -1,15 +1,9 @@
 name: GitHub Actions Security Analysis with zizmor 🌈
 
 on:
-  push:
-    branches:
-      - develop
-      - stable
-  pull_request:
-    branches:
-      - develop
-      - stable
-
+  workflow_dispatch:
+  schedule:
+    - cron: 0 15 * * 5
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
@@ -19,7 +13,8 @@ permissions: {}
 jobs:
   zizmor:
     name: Run zizmor 🌈
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.ACTIONS_RUNNER_POLICY || 
+      '{"linux":["ubuntu-24.04"],"arm64":["ubuntu-24.04-arm"],"x64":["ubuntu-24.04"],"hosted":true}').linux }}
     permissions:
       security-events: write # Required for upload-sarif (used by zizmor-action) to upload SARIF files.
       # contents: read         # Only needed for private repos. Needed to clone the repo.
@@ -32,3 +27,4 @@ jobs:
 
       - name: Run zizmor 🌈
         uses: zizmorcore/zizmor-action@135698455da5c3b3e55f73f4419e481ab68cdd95 # v0.4.1
+    timeout-minutes: 60

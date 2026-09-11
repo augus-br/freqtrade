@@ -1,11 +1,9 @@
 name: Build Documentation
 
 on:
-  push:
-    branches:
-      - develop
-  release:
-    types: [published]
+  workflow_dispatch:
+  schedule:
+    - cron: 18 1 * * 5
 
 
 # disable permissions for all of the available permissions
@@ -20,7 +18,8 @@ jobs:
     permissions:
       contents: write  #  for mike to push
     name: Deploy Docs through mike
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.ACTIONS_RUNNER_POLICY || 
+      '{"linux":["ubuntu-24.04"],"arm64":["ubuntu-24.04-arm"],"x64":["ubuntu-24.04"],"hosted":true}').linux }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -62,3 +61,4 @@ jobs:
       - name: Show mike versions
         run: |
           mike list
+    timeout-minutes: 60
